@@ -92,7 +92,9 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-#import <PhoneGap/PGPlugin.h>
+// #import <PhoneGap/PGPlugin.h>
+
+#import <Cordova/CDVPlugin.h>
 
 @protocol iRateDelegate <NSObject>
 @optional
@@ -106,7 +108,7 @@
 @end
 
 
-@interface iRatePlugin : PGPlugin <NSObject> 
+@interface iRatePlugin : CDVPlugin <NSObject>
 
 
 
@@ -154,6 +156,7 @@
 - (void)applicationLaunched:(NSNotification *)notification;
 
 //phonegap reach functions - via Wizcorp @ http://wizcorp.jp
-- (void)launch:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
+//- (void)launch:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
+- (void)launch:(CDVInvokedUrlCommand*)command;
 
 @end

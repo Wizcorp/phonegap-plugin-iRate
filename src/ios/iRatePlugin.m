@@ -32,7 +32,7 @@
 //
 
 #import "iRatePlugin.h"
-#import "WizDebugLog.h"
+//#import "WizDebugLog.h"
 
 
 static NSString *const iRateRatedVersionKey = @"iRateRatedVersionChecked";
@@ -88,11 +88,47 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 
 
 // phonegap plugin launcher with options
-- (void)launch:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
+//- (void)launch:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
+- (void)launch:(CDVInvokedUrlCommand *)command
 {
-    WizLog(@"[iRatePlugin] LAUNCHING %@", options);
+   // NSLog(@"[iRatePlugin] LAUNCHING %@", options);
+    NSArray* args = [command arguments];
+    NSLog(@"args = %@ and count = %lu",args,(unsigned long)args.count);
+    if (args.count > 0) {
+        NSMutableDictionary* options = [[command arguments] objectAtIndex:0];
+        NSLog(@"[iRatePlugin] LAUNCHING %@", options);
+        debug =                     [[options objectForKey:@"debug"] boolValue];
+        promptAtLaunch =            [[options objectForKey:@"promptAtLaunch"] boolValue];
+        usesUntilPrompt =           [[options objectForKey:@"usesUntilPrompt"] intValue];
+        eventsUntilPrompt =         [[options objectForKey:@"eventsUntilPrompt"] intValue];
+        daysUntilPrompt =           [[options objectForKey:@"daysUntilPrompt"] floatValue];
+        remindPeriod =              [[options objectForKey:@"remindPeriod"] floatValue];
+        
+        self.appStoreID =           [[options objectForKey:@"appStoreID"] intValue];
+       
+    }
     
-
+    else {
+        
+        NSLog(@"[iRatePlugin] Else");
+        
+        //usage settings - these have sensible defaults
+        promptAtLaunch = NO;
+        usesUntilPrompt = 5;
+        eventsUntilPrompt = 3;
+        daysUntilPrompt = 10.0f;
+        remindPeriod = 1.0f;
+        debug = NO;
+        appStoreID = 731897674;
+    
+    }
+    
+    //message text, you may wish to customise these, e.g. for localisation
+    self.messageTitle = nil; //set lazily so that appname can be included
+    self.message = nil; //set lazily so that appname can be included
+    self.cancelButtonLabel = @"No, Thanks";
+    self.remindButtonLabel = @"Remind Me Later";
+    self.rateButtonLabel = @"Rate It Now";
     
     //localised application name and version
     self.applicationVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
@@ -102,45 +138,6 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         self.applicationName = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
     }
 
-    
-    if (options) {
-        
-        debug =                     [[options objectForKey:@"debug"] boolValue];
-        promptAtLaunch =            [[options objectForKey:@"promptAtLaunch"] boolValue];
-        usesUntilPrompt =           [[options objectForKey:@"usesUntilPrompt"] intValue];
-        eventsUntilPrompt =         [[options objectForKey:@"eventsUntilPrompt"] intValue];
-        daysUntilPrompt =           [[options objectForKey:@"daysUntilPrompt"] floatValue];
-        remindPeriod =              [[options objectForKey:@"remindPeriod"] floatValue];
-        
-        self.appStoreID =           [[options objectForKey:@"appStoreID"] intValue];
-        self.messageTitle =         [options objectForKey:@"messageTitle"];
-        self.message =              [options objectForKey:@"message"];
-        self.cancelButtonLabel =    [options objectForKey:@"cancelButtonLabel"];
-        self.remindButtonLabel =    [options objectForKey:@"remindButtonLabel"];
-        self.rateButtonLabel =      [options objectForKey:@"rateButtonLabel"];
-        
-    } else {
-        
-        //usage settings - these have sensible defaults
-        promptAtLaunch = YES;
-        usesUntilPrompt = 10;
-        eventsUntilPrompt = 10;
-        daysUntilPrompt = 10.0f;
-        remindPeriod = 1.0f;
-        debug = YES;
-        appStoreID = 12345678;
-        
-        //message text, you may wish to customise these, e.g. for localisation
-        self.messageTitle = nil; //set lazily so that appname can be included
-        self.message = nil; //set lazily so that appname can be included
-        self.cancelButtonLabel = @"No, Thanks";
-        self.remindButtonLabel = @"Remind Me Later";
-        self.rateButtonLabel = @"Rate It Now";
-        
-    }
-    
-    
-    
     //register for iphone application events
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationLaunched:)
@@ -156,11 +153,6 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
     }
         
     [self applicationLaunched:Nil];
-    
-    
-    
-    
-    
 
 }
 
@@ -284,7 +276,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 - (void)incrementUseCount
 {
     self.usesCount ++;
-    WizLog(@"[iRatePlugin] self.usesCount %i", self.usesCount);
+    NSLog(@"[iRatePlugin] self.usesCount %i", self.usesCount);
 }
 
 - (void)incrementEventCount
@@ -303,30 +295,35 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
     //check if we've rated this version
     else if (self.ratedThisVersion)
     {
+         NSLog(@"[iRatePlugin] ratedThisVersion ");
         return NO;
     }
     
     //check if we've declined to rate this version
     else if (self.declinedThisVersion)
     {
+        NSLog(@"[iRatePlugin] declinedThisVersion ");
         return NO;
     }
     
     //check how long we've been using this version
-    else if (self.firstUsed == nil || [[NSDate date] timeIntervalSinceDate:self.firstUsed] < daysUntilPrompt * SECONDS_IN_A_DAY)
+   /* else if (self.firstUsed == nil || [[NSDate date] timeIntervalSinceDate:self.firstUsed] < daysUntilPrompt * SECONDS_IN_A_DAY)
     {
+        NSLog(@"[iRatePlugin] How long ");
         return NO;
     }
     
     //check how many times we've used it and the number of significant events
     else if (self.usesCount < usesUntilPrompt && self.eventCount < eventsUntilPrompt)
     {
+        NSLog(@"[iRatePlugin] significant event ");
         return NO;
-    }
+    }*/
     
     //check if within the reminder period
     else if (self.lastReminded != nil && [[NSDate date] timeIntervalSinceDate:self.lastReminded] < remindPeriod * SECONDS_IN_A_DAY)
     {
+        NSLog(@"[iRatePlugin] reminder period ");
         return NO;
     }
     
@@ -410,11 +407,12 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
     }
     
     [self incrementUseCount];
-    WizLog(@"[iRatePlugin] INCREMENT");
-    if (promptAtLaunch && [self shouldPromptForRating])
+    NSLog(@"[iRatePlugin] INCREMENT");
+    if ([self shouldPromptForRating])
     {
-        WizLog(@"[iRatePlugin] promptIfNetworkAvailable ");
-        [self promptIfNetworkAvailable];
+        NSLog(@"[iRatePlugin] promptIfNetworkAvailable ");
+        //[self promptIfNetworkAvailable];
+        [self promptForRating];
     }
 }
 
@@ -424,9 +422,10 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
     if ([UIApplication sharedApplication].applicationState == UIApplicationStateBackground)
     {
         [self incrementUseCount];
-        if (promptAtLaunch && [self shouldPromptForRating])
+        if ([self shouldPromptForRating])
         {
-            [self promptIfNetworkAvailable];
+            [self promptForRating];
+            //[self promptIfNetworkAvailable];
         }
     }
 }
