@@ -34,7 +34,7 @@
 #import "iRatePlugin.h"
 //#import "WizDebugLog.h"
 
-
+static NSString *const iRateAppStoreIDKey = @"iRateAppStoreID";
 static NSString *const iRateRatedVersionKey = @"iRateRatedVersionChecked";
 static NSString *const iRateDeclinedVersionKey = @"iRateDeclinedVersion";
 static NSString *const iRateLastRemindedKey = @"iRateLastReminded";
@@ -44,14 +44,18 @@ static NSString *const iRateUseCountKey = @"iRateUseCount";
 static NSString *const iRateEventCountKey = @"iRateEventCount";
 
 static NSString *const iRateMacAppStoreBundleID = @"com.apple.appstore";
+static NSString *const iRateAppLookupURLFormat = @"http://itunes.apple.com/%@/lookup";
 
-//note, these don't link directly to the review page - there doesn't seem to be a way to do that
-static NSString *const iRateiOSAppStoreURLFormat = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%i";
-static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.com/app/id%i";
+static NSString *const iRateiOSAppStoreURLScheme = @"itms-apps";
+static NSString *const iRateiOSAppStoreURLFormat = @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@";
+static NSString *const iRateiOS7AppStoreURLFormat = @"itms-apps://itunes.apple.com/app/id%@";
+static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.com/app/id%@";
 
 
 #define SECONDS_IN_A_DAY 86400.0
+#define SECONDS_IN_A_WEEK 604800.0
 #define MAC_APP_STORE_REFRESH_DELAY 5.0
+#define REQUEST_TIMEOUT 60.0
 
 
 @interface iRatePlugin() <UIAlertViewDelegate>
@@ -184,8 +188,8 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         return ratingsURL;
     }
     
-    return [NSURL URLWithString:[NSString stringWithFormat:iRateiOSAppStoreURLFormat, appStoreID]];
-
+    //return [NSURL URLWithString:[NSString stringWithFormat:iRateiOSAppStoreURLFormat, appStoreID]];
+ return [NSURL URLWithString:[NSString stringWithFormat:([[UIDevice currentDevice].systemVersion floatValue] >= 7.0f)? iRateiOS7AppStoreURLFormat: iRateiOSAppStoreURLFormat, @(self.appStoreID)]];
 }
 
 - (NSDate *)firstUsed
