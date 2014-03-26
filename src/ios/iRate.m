@@ -1,6 +1,4 @@
 //
-//  iRate.m
-//
 //  Version 1.3.3
 //
 //  Created by Nick Lockwood on 26/01/2011.
@@ -30,11 +28,10 @@
 //
 //  3. This notice may not be removed or altered from any source distribution.
 //
+#import "iRate.h"
+#import <Cordova/CDV.h>
 
-#import "iRatePlugin.h"
-//#import "WizDebugLog.h"
 
-static NSString *const iRateAppStoreIDKey = @"iRateAppStoreID";
 static NSString *const iRateRatedVersionKey = @"iRateRatedVersionChecked";
 static NSString *const iRateDeclinedVersionKey = @"iRateDeclinedVersion";
 static NSString *const iRateLastRemindedKey = @"iRateLastReminded";
@@ -53,12 +50,10 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 
 
 #define SECONDS_IN_A_DAY 86400.0
-#define SECONDS_IN_A_WEEK 604800.0
 #define MAC_APP_STORE_REFRESH_DELAY 5.0
-#define REQUEST_TIMEOUT 60.0
 
 
-@interface iRatePlugin() <UIAlertViewDelegate>
+@interface iRate() <UIAlertViewDelegate>
 
 
 @property (nonatomic, strong) id visibleAlert;
@@ -66,7 +61,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 @end
 
 
-@implementation iRatePlugin
+@implementation iRate
 
 @synthesize appStoreID;
 @synthesize applicationName;
@@ -92,15 +87,15 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 
 
 // phonegap plugin launcher with options
-//- (void)launch:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
+
 - (void)launch:(CDVInvokedUrlCommand *)command
 {
-   // NSLog(@"[iRatePlugin] LAUNCHING %@", options);
+    
     NSArray* args = [command arguments];
-    NSLog(@"args = %@ and count = %lu",args,(unsigned long)args.count);
+    
     if (args.count > 0) {
         NSMutableDictionary* options = [[command arguments] objectAtIndex:0];
-        NSLog(@"[iRatePlugin] LAUNCHING %@", options);
+        NSLog(@"[iRate] LAUNCHING %@", options);
         debug =                     [[options objectForKey:@"debug"] boolValue];
         promptAtLaunch =            [[options objectForKey:@"promptAtLaunch"] boolValue];
         usesUntilPrompt =           [[options objectForKey:@"usesUntilPrompt"] intValue];
@@ -109,30 +104,24 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         remindPeriod =              [[options objectForKey:@"remindPeriod"] floatValue];
         
         self.appStoreID =           [[options objectForKey:@"appStoreID"] intValue];
-       
+        
+        
+        self.messageTitle = [options objectForKey:@"messageTitle"]; //set lazily so that appname can be included
+        self.message = [options objectForKey:@"message"]; //set lazily so that appname can be included
+        self.cancelButtonLabel = [options objectForKey:@"cancelButtonLabel"];
+        self.remindButtonLabel = [options objectForKey:@"remindButtonLabel"];
+        self.rateButtonLabel = [options objectForKey :@"rateButtonLabel"];
+        
+        NSLog(@"[iRate] LAUNCHING %@", args);
+        
+        
+    } else {
+        
+        NSLog(@"[iRate] Else");
+        
     }
     
-    else {
-        
-        NSLog(@"[iRatePlugin] Else");
-        
-        //usage settings - these have sensible defaults
-        promptAtLaunch = NO;
-        usesUntilPrompt = 5;
-        eventsUntilPrompt = 3;
-        daysUntilPrompt = 10.0f;
-        remindPeriod = 1.0f;
-        debug = NO;
-        appStoreID = 731897674;
     
-    }
-    
-    //message text, you may wish to customise these, e.g. for localisation
-    self.messageTitle = nil; //set lazily so that appname can be included
-    self.message = nil; //set lazily so that appname can be included
-    self.cancelButtonLabel = @"No, Thanks";
-    self.remindButtonLabel = @"Remind Me Later";
-    self.rateButtonLabel = @"Rate It Now";
     
     //localised application name and version
     self.applicationVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
@@ -141,7 +130,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
     {
         self.applicationName = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
     }
-
+    
     //register for iphone application events
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationLaunched:)
@@ -155,9 +144,9 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
                                                      name:UIApplicationWillEnterForegroundNotification
                                                    object:nil];
     }
-        
+    
     [self applicationLaunched:Nil];
-
+    
 }
 
 
@@ -165,20 +154,24 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 
 - (NSString *)messageTitle
 {
-    if (messageTitle)
+    if ([messageTitle isEqual:[NSNull null]])
     {
+        return [NSString stringWithFormat:@"Rate %@", applicationName];
+    } else {
         return messageTitle;
     }
-    return [NSString stringWithFormat:@"Rate %@", applicationName];
+    
 }
 
 - (NSString *)message
 {
-    if (message)
+    if ([message isEqual:[NSNull null]])
     {
+        return [NSString stringWithFormat:@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", applicationName];
+        
+    } else {
         return message;
     }
-    return [NSString stringWithFormat:@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", applicationName];
 }
 
 - (NSURL *)ratingsURL
@@ -188,8 +181,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         return ratingsURL;
     }
     
-    //return [NSURL URLWithString:[NSString stringWithFormat:iRateiOSAppStoreURLFormat, appStoreID]];
- return [NSURL URLWithString:[NSString stringWithFormat:([[UIDevice currentDevice].systemVersion floatValue] >= 7.0f)? iRateiOS7AppStoreURLFormat: iRateiOSAppStoreURLFormat, @(self.appStoreID)]];
+    return [NSURL URLWithString:[NSString stringWithFormat:([[UIDevice currentDevice].systemVersion floatValue] >= 7.0f)? iRateiOS7AppStoreURLFormat: iRateiOSAppStoreURLFormat, @(self.appStoreID)]];
 }
 
 - (NSDate *)firstUsed
@@ -280,7 +272,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 - (void)incrementUseCount
 {
     self.usesCount ++;
-    NSLog(@"[iRatePlugin] self.usesCount %i", self.usesCount);
+    NSLog(@"[iRate] self.usesCount %i", self.usesCount);
 }
 
 - (void)incrementEventCount
@@ -289,7 +281,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 }
 
 - (BOOL)shouldPromptForRating
-{   
+{
     //debug mode?
     if (debug)
     {
@@ -299,35 +291,35 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
     //check if we've rated this version
     else if (self.ratedThisVersion)
     {
-         NSLog(@"[iRatePlugin] ratedThisVersion ");
+        NSLog(@"[iRate] ratedThisVersion ");
         return NO;
     }
     
     //check if we've declined to rate this version
     else if (self.declinedThisVersion)
     {
-        NSLog(@"[iRatePlugin] declinedThisVersion ");
+        NSLog(@"[iRate] declinedThisVersion ");
         return NO;
     }
     
     //check how long we've been using this version
-   /* else if (self.firstUsed == nil || [[NSDate date] timeIntervalSinceDate:self.firstUsed] < daysUntilPrompt * SECONDS_IN_A_DAY)
+    else if (self.firstUsed == nil || [[NSDate date] timeIntervalSinceDate:self.firstUsed] < daysUntilPrompt * SECONDS_IN_A_DAY)
     {
-        NSLog(@"[iRatePlugin] How long ");
+        NSLog(@"[iRate] How long ");
         return NO;
     }
     
     //check how many times we've used it and the number of significant events
     else if (self.usesCount < usesUntilPrompt && self.eventCount < eventsUntilPrompt)
     {
-        NSLog(@"[iRatePlugin] significant event ");
+        NSLog(@"[iRate] significant event ");
         return NO;
-    }*/
+    }
     
     //check if within the reminder period
     else if (self.lastReminded != nil && [[NSDate date] timeIntervalSinceDate:self.lastReminded] < remindPeriod * SECONDS_IN_A_DAY)
     {
-        NSLog(@"[iRatePlugin] reminder period ");
+        NSLog(@"[iRate] reminder period ");
         return NO;
     }
     
@@ -339,7 +331,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 {
     if (!visibleAlert)
     {
-  
+        
         self.visibleAlert = [[UIAlertView alloc] initWithTitle:self.messageTitle
                                                        message:self.message
                                                       delegate:self
@@ -353,7 +345,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         
         [visibleAlert show];
         AH_RELEASE(visibleAlert);
-    
+        
         
     }
 }
@@ -361,7 +353,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 - (void)promptIfNetworkAvailable
 {
     //test for app store connectivity the simplest, most reliable way - by accessing apple.com
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://apple.com"] 
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://apple.com"]
                                              cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
                                          timeoutInterval:10.0];
     //send request
@@ -411,12 +403,11 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
     }
     
     [self incrementUseCount];
-    NSLog(@"[iRatePlugin] INCREMENT");
+    NSLog(@"[iRate] INCREMENT");
     if ([self shouldPromptForRating])
     {
-        NSLog(@"[iRatePlugin] promptIfNetworkAvailable ");
-        //[self promptIfNetworkAvailable];
-        [self promptForRating];
+        NSLog(@"[iRate] promptIfNetworkAvailable ");
+        [self promptIfNetworkAvailable];
     }
 }
 
@@ -428,8 +419,7 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         [self incrementUseCount];
         if ([self shouldPromptForRating])
         {
-            [self promptForRating];
-            //[self promptIfNetworkAvailable];
+            [self promptIfNetworkAvailable];
         }
     }
 }

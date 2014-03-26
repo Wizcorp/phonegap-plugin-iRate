@@ -1,6 +1,4 @@
 //
-//  iRate.h
-//
 //  Version 1.3.3
 //
 //  Created by Nick Lockwood on 26/01/2011.
@@ -92,9 +90,10 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-// #import <PhoneGap/PGPlugin.h>
 
-#import <Cordova/CDVPlugin.h>
+
+#import <Cordova/CDV.h>
+
 
 @protocol iRateDelegate <NSObject>
 @optional
@@ -107,10 +106,7 @@
 
 @end
 
-
-@interface iRatePlugin : CDVPlugin <NSObject>
-
-
+@interface iRate : CDVPlugin <NSObject>
 
 //app-store id - always set this
 @property (nonatomic, assign) NSUInteger appStoreID;
@@ -155,8 +151,8 @@
 
 - (void)applicationLaunched:(NSNotification *)notification;
 
-//phonegap reach functions - via Wizcorp @ http://wizcorp.jp
-//- (void)launch:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
+
 - (void)launch:(CDVInvokedUrlCommand*)command;
+
 
 @end
