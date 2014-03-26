@@ -26,9 +26,10 @@ PhoneGap plugin for customer/client app rating. [iOS ONLY]
 
     iRate.launch(args);
 }
-```javascript
+
 
 # Advance Usage:
+
 ```javascript
 {
 
