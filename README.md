@@ -12,10 +12,12 @@ phonegap-plugin-iRate
 PhoneGap plugin for customer/client app rating. [iOS ONLY]
 
 
-# Basic USAGE:
+# USAGE :
+
+### BASIC
 ```javascript
 {
-    var args = { debug : "YES",
+    var args = { debug : "YES",         //set to NO for production app
                  promptAtLaunch : "NO",
                  usesUntilPrompt : 5,
                  eventsUntilPrompt : 10,
@@ -26,9 +28,9 @@ PhoneGap plugin for customer/client app rating. [iOS ONLY]
 
     iRate.launch(args);
 }
+```
 
-
-# Advance Usage:
+### Advance
 
 ```javascript
 {
@@ -50,7 +52,8 @@ PhoneGap plugin for customer/client app rating. [iOS ONLY]
     iRate.launch(args);
 
 }
-```javascript
+```
+
 # DOCS & SUPPORT :
 
 PhoneGap v1.1
