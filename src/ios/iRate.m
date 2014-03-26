@@ -91,11 +91,12 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
 - (void)launch:(CDVInvokedUrlCommand *)command
 {
     
+    
     NSArray* args = [command arguments];
     
     if (args.count > 0) {
         NSMutableDictionary* options = [[command arguments] objectAtIndex:0];
-        NSLog(@"[iRate] LAUNCHING %@", options);
+        
         debug =                     [[options objectForKey:@"debug"] boolValue];
         promptAtLaunch =            [[options objectForKey:@"promptAtLaunch"] boolValue];
         usesUntilPrompt =           [[options objectForKey:@"usesUntilPrompt"] intValue];
@@ -113,11 +114,11 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         self.rateButtonLabel = [options objectForKey :@"rateButtonLabel"];
         
         NSLog(@"[iRate] LAUNCHING %@", args);
-        
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
         
     } else {
         
-        NSLog(@"[iRate] Else");
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid Arguments"] callbackId:command.callbackId];
         
     }
     
