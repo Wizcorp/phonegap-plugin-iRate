@@ -28,11 +28,10 @@ iRate.prototype = {
                             for (var key in defaults) {
                                 if(options[key] != undefined) {
                                     defaults[key]=options[key];
-                                    console.log("defaults key = "+defaults[key]+"and Options key = "+options[key]);
                                 }
                             }
                     }
-                    console.log("Defaults = "+defaults);
+               
                     cordova.exec(success, error, "iRate", "launch", [defaults] );
 }
 
