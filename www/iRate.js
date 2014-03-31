@@ -1,5 +1,5 @@
-cordova.define("me.rahul.plugins.iRate.iRate", function(require, exports, module) { var cordova = require('cordova'),
-    exec = require('cordova/exec');
+var cordova=require('cordova'),
+exec=require('cordova/exec');
 
 var iRate = function() {
         this.options = {};
@@ -40,5 +40,3 @@ iRate.prototype = {
 var iRateInstance = new iRate();
 
 module.exports = iRateInstance;
-
-});
