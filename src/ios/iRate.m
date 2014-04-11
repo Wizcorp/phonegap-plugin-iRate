@@ -104,8 +104,11 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         daysUntilPrompt =           [[options objectForKey:@"daysUntilPrompt"] floatValue];
         remindPeriod =              [[options objectForKey:@"remindPeriod"] floatValue];
         
+        if (![options objectForKey:@"appStoreID"]) {
+            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Missing appStoreID"] callbackId:command.callbackId];
+            return;
+        }
         self.appStoreID =           [[options objectForKey:@"appStoreID"] intValue];
-        
         
         self.messageTitle = [options objectForKey:@"messageTitle"]; //set lazily so that appname can be included
         self.message = [options objectForKey:@"message"]; //set lazily so that appname can be included

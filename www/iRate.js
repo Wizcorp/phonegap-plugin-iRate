@@ -1,40 +1,35 @@
-var cordova=require('cordova'),
-exec=require('cordova/exec');
+var exec = require('cordova/exec');
 
-var iRate = function() {
+var iRate = function () {
         this.options = {};
 };
 
 iRate.prototype = {
     
-            launch: function( options, success, error ) {
+            launch: function(options, success, error) {
             
                     var defaults = {
-                                debug   :   "YES",
-                                promptAtLaunch  :   "NO",
-                                usesUntilPrompt :   10,
-                                eventsUntilPrompt   :   10,
-                                daysUntilPrompt :   "3.0f",
-                                remindPeriod    :   "2.0f",
-                                appStoreID  :   11212321,
-                                messageTitle : null,
-                                message : null,
-                                cancelButtonLabel : "No, Thanks",
-                                remindButtonLabel : "Remind Me Later",
-                                rateButtonLabel : "Rate It Now"
+                                debug: true,
+                                promptAtLaunch: false,
+                                usesUntilPrompt: 10,
+                                eventsUntilPrompt: 10,
+                                daysUntilPrompt: 3,
+                                remindPeriod: 2,
+                                cancelButtonLabel: "No, Thanks",
+                                remindButtonLabel: "Remind Me Later",
+                                rateButtonLabel: "Rate It Now"
                     };
     
-                    if(options){
+                    if (options) {
                             for (var key in defaults) {
-                                if(options[key] != undefined) {
-                                    defaults[key]=options[key];
+                                if (options[key] != undefined) {
+                                    defaults[key] = options[key];
                                 }
                             }
                     }
-               
-                    cordova.exec(success, error, "iRate", "launch", [defaults] );
-}
 
+                    cordova.exec(success, error, "iRate", "launch", [defaults]);
+            }
 };
 
 var iRateInstance = new iRate();
