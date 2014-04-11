@@ -1,62 +1,35 @@
 
 
 
-# PLUGIN: 
+# phonegap-plugin-iRate
 
-phonegap-plugin-iRate
-
-
-
-# DESCRIPTION :
+## Description
 
 PhoneGap plugin for customer/client app rating. [iOS ONLY]
 
+## Usage
 
-# USAGE :
+`iRate.launch(Object options, Function success, Function failure);`
 
-### BASIC
-```javascript
-{
-    var args = { 
-                 debug : "YES",         //set to NO for production app
-                 promptAtLaunch : "NO",
-                 usesUntilPrompt : 5,
-                 eventsUntilPrompt : 10,
-                 daysUntilPrompt : "3.0f",
-                 remindPeriod : "2.0f",
-                 appStoreID : your_app_id
-                };
-
-    iRate.launch(args);
-}
-```
-
-### Advance
+Default values are listed below.
 
 ```javascript
-{
 
-    var args = { 
-                 debug   :   "YES",
-                 promptAtLaunch  :   "NO",
-                 usesUntilPrompt :   10,
-                 eventsUntilPrompt   :   10,
-                 daysUntilPrompt :   "3.0f",
-                 remindPeriod    :   "2.0f",
-                 appStoreID  :   11212321,
-                 messageTitle : "Enjoy Rate it", //pass null to use Application Name
-                 message : "Your message goes here",    //pass null to use default message
-                 cancelButtonLabel : "No, Thanks",
-                 remindButtonLabel : "Remind Me Later",
-                 rateButtonLabel : "Rate It Now"
-                };
+    var args = {
+    	appStoreID: your_app_id, 	// REQUIRED
+	    debug: true, 				// optional
+	    promptAtLaunch: false, 		// optional
+	    usesUntilPrompt: 10, 		// optional
+	    eventsUntilPrompt: 10, 		// optional
+	    daysUntilPrompt: "3.0f", 	// optional
+	    remindPeriod: "2.0f", 		// optional
+	    messageTitle: "Enjoy Rate it", 		// optional
+	    message: "Your message goes here", 	// optional
+	    cancelButtonLabel: "No, Thanks", 		// optional
+	    remindButtonLabel: "Remind Me Later",	// optional
+	    rateButtonLabel: "Rate It Now" 		// optional
+    };
 
     iRate.launch(args);
 
-}
 ```
-
-# DOCS & SUPPORT :
-
-PhoneGap v1.1
-http://dev.wizcorp.jp/wiki/
