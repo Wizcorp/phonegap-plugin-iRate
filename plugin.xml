@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="me.rahul.plugins.iRate"
+        version="1.0"
+        xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    
+        <name>iRate</name>
+    
+        <description>PhoneGap plugin for customer/client app rating. [iOS ONLY]</description>
+    
+        <js-module name="iRate" src="www/iRate.js">
+            <clobbers target="window.iRate" />
+        </js-module>
+        
+        <platform name="ios">
+            <config-file parent="/*" target="config.xml">
+                <feature name="iRate">
+                    <param name="ios-package" value="iRate" />
+                </feature>
+            </config-file>
+            
+            <header-file src="src/ios/iRate.h" />
+            <source-file src="src/ios/iRate.m" />
+        </platform>
+</plugin>
