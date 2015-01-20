@@ -47,7 +47,7 @@ static NSString *const iRateiOSAppStoreURLScheme = @"itms-apps";
 static NSString *const iRateiOSAppStoreURLFormat = @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@";
 static NSString *const iRateiOS7AppStoreURLFormat = @"itms-apps://itunes.apple.com/app/id%@";
 static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.com/app/id%@";
-
+static NSString *const iRateiOS8AppStoreURLFormat = @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=%d&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software";
 
 #define SECONDS_IN_A_DAY 86400.0
 #define MAC_APP_STORE_REFRESH_DELAY 5.0
@@ -182,7 +182,23 @@ static NSString *const iRateMacAppStoreURLFormat = @"macappstore://itunes.apple.
         return ratingsURL;
     }
     
-    return [NSURL URLWithString:[NSString stringWithFormat:([[UIDevice currentDevice].systemVersion floatValue] >= 7.0f)? iRateiOS7AppStoreURLFormat: iRateiOSAppStoreURLFormat, @(self.appStoreID)]];
+    //return [NSURL URLWithString:[NSString stringWithFormat:([[UIDevice currentDevice].systemVersion floatValue] >= 7.0f)? iRateiOS7AppStoreURLFormat: iRateiOSAppStoreURLFormat, @(self.appStoreID)]];
+    float devversion = [[UIDevice currentDevice].systemVersion floatValue];
+    NSString *reviewURL = nil;
+    
+    if (devversion < 7.0) {
+        reviewURL = [NSString stringWithFormat:iRateiOSAppStoreURLFormat,self.appStoreID];
+        return [NSURL URLWithString:reviewURL];
+    }
+    else if (devversion >= 7.0 && devversion < 8.0){
+        reviewURL = [NSString stringWithFormat:iRateiOS7AppStoreURLFormat,self.appStoreID];
+        return [NSURL URLWithString:reviewURL];
+    }
+    else
+    {
+        reviewURL = [NSString stringWithFormat:iRateiOS8AppStoreURLFormat,self.appStoreID];
+        return [NSURL URLWithString:reviewURL];
+    }
 }
 
 - (NSDate *)firstUsed
